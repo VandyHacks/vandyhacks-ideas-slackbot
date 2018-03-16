@@ -16,7 +16,7 @@ let trelloListIDs = {
 }
 
 bot.on('start', function() {
-	var params = {
+	let params = {
 	icon_emoji: ":female-office-worker:"
 	}
 	bot.postMessageToChannel('testchannel',"Hi I'm Jenny the Slack Bot for VandyHacks and I will sort your ideas!", params);
@@ -33,7 +33,7 @@ bot.on('message',function(data) {
 		console.log(committees);
 		let commiteesArray = committees.split(",");
 
-		var params = {
+		let params = {
 			icon_emoji: ":female-office-worker:",
 			thread_ts: data.ts
 		}
@@ -67,7 +67,7 @@ bot.on('message',function(data) {
 });
 
 //TODO: I also want to map threads to ideas so users can "delete this idea", "update this idea"
-var options = { method: 'POST',
+let options = { method: 'POST',
   url: 'https://api.trello.com/1/cards',
   qs: 
    { name: 'Get eaten by Sharks!',
