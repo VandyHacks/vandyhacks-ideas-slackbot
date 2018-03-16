@@ -1,0 +1,24 @@
+{
+  "name": "vandyhacks-slackbot",
+  "version": "1.0.0",
+  "description": "slackbot for vandyhacks board",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevjin/vandyhacks-slackbot.git"
+  },
+  "author": "Kevin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kevjin/vandyhacks-slackbot/issues"
+  },
+  "homepage": "https://github.com/kevjin/vandyhacks-slackbot#readme",
+  "dependencies": {
+    "dotenv": "^5.0.1",
+    "s": "^0.1.1",
+    "slackbots": "^1.1.0"
+  }
+}
