@@ -1,15 +1,15 @@
 require('dotenv').config();
-let SlackBot = require('slackbots');
-let request = require("request");
+const SlackBot = require('slackbots');
+const request = require("request");
 
 //create the Slackbot
-let bot = new SlackBot({
+const bot = new SlackBot({
 	token: process.env.SLACKBOT_TOKEN,
 	name: 'Jenny'
 });
 
 //IDs of each committee list on Trello Board
-let trelloListIDs = {
+const trelloListIDs = {
 	"dev":"5aab5b7a6cfdf064d8dab063",
 	"test":"5aab58024860cf64f1b2cab7",
 	"sponsorship":"5aab5b7954bd914c03e95a0c",
@@ -46,7 +46,7 @@ function postCardOnTrello(data) {
 	let committees = data.text.substring(0,data.text.indexOf("::")).replace(/\s+/g, '');
 	console.log(committees);
 	let commiteesArray = committees.split(",");
-	let params = {
+	const params = {
 		icon_emoji: ":female-office-worker:",
 		thread_ts: data.ts
 	}
@@ -100,7 +100,7 @@ function checkMessageUpdates() {
 		  		trelloCard.then( card => {
 		  			if(card.desc.indexOf(message.edited.ts)==-1) {
 		  				console.log(card);
-		  				let options = { 
+		  				const options = { 
 		  					method: 'PUT',
 		  					url: 'https://api.trello.com/1/cards/'+card.id,
 		  					qs: { 
@@ -112,7 +112,7 @@ function checkMessageUpdates() {
 		  					 };
 						request(options, function (error, response, body) {
 						  if (error) throw new Error(error);
-						  	let params = {
+						  	const params = {
 								icon_emoji: ":female-office-worker:",
 								thread_ts: message.ts
 							}
@@ -130,7 +130,7 @@ function checkMessageUpdates() {
 }
 //returns all the cards on trello board in an array
 function getAllCardsFromTrello() {
-	options = { method: 'GET',
+	const options = { method: 'GET',
 	  url: 'https://api.trello.com/1/boards/5aab56b2f7eff265dc076d7c/cards',
 	  qs: 
 	   { key: process.env.TRELLO_KEY,
@@ -155,11 +155,11 @@ function checkCardsToDelete() {
 					checkCard.then((deletedIdeaTs)=> {
 						console.log("delete this card" + card.desc.substring(card.desc.indexOf(">>")+2,card.desc.indexOf("<<")-1));
 
-						let options = { method: 'DELETE',
+						const options = { method: 'DELETE',
 						  url: 'https://api.trello.com/1/cards/'+card.id,
 						  qs: { key: process.env.TRELLO_KEY, token: process.env.TRELLO_TOKEN } };
 						
-						let params = {
+						const params = {
 							icon_emoji: ":female-office-worker:",
 							thread_ts: deletedIdeaTs
 						  }
@@ -228,7 +228,7 @@ setInterval(checkCardsToDelete,5000);
 //TODO: I also want to map threads to ideas so users can "delete this idea", "update this idea"
 
 //Post request to create a new trello card, hardcoded fields are obv changed
-let options = { method: 'POST',
+const options = { method: 'POST',
   url: 'https://api.trello.com/1/cards',
   qs: 
    { name: 'Get eaten by Sharks!',
@@ -240,7 +240,7 @@ let options = { method: 'POST',
   } };
 
 //Request to get all the messages in a channel
-let getChannelMessages = { method: 'GET',
+const getChannelMessages = { method: 'GET',
   url: 'https://slack.com/api/channels.history',
   qs: 
    { 
