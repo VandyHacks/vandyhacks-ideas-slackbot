@@ -2,9 +2,12 @@ require('dotenv').config();
 const SlackBot = require('slackbots');
 const request = require("request");
 
+const {SLACKBOT_TOKEN, TRELLO_TOKEN, TRELLO_KEY} = process.env;
+const TRELLO_CARDS_URL = 'https://api.trello.com/1/cards';
+
 //create the Slackbot
 const bot = new SlackBot({
-	token: process.env.SLACKBOT_TOKEN,
+	token: SLACKBOT_TOKEN,
 	name: 'Jenny'
 });
 
@@ -54,14 +57,14 @@ function postCardOnTrello(data) {
 
 	let options = {
 		method: 'POST',
-		url: 'https://api.trello.com/1/cards',
+		url: TRELLO_CARDS_URL,
 		qs: {
 			name: data.text.substring(data.text.indexOf("::") + 2, data.text.length),
 			desc: "Submitted by " + data.user + "\nSlack ID>>" + data.ts + "<<", //TODO need to fix User's name
 			idList: trelloListIDs["test"],
 			keepFromSource: 'all',
-			key: process.env.TRELLO_KEY,
-			token: process.env.TRELLO_TOKEN
+			key: TRELLO_KEY,
+			token: TRELLO_TOKEN
 		}
 	};
 
@@ -107,12 +110,12 @@ function checkMessageUpdates() {
 				console.log(card);
 				const options = {
 					method: 'PUT',
-					url: 'https://api.trello.com/1/cards/' + card.id,
+					url: TRELLO_CARDS_URL + card.id,
 					qs: {
 						name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
 						desc: card.desc + "\nEdited Slack ID: " + message.edited.ts,
-						key: process.env.TRELLO_KEY,
-						token: process.env.TRELLO_TOKEN
+						key: TRELLO_KEY,
+						token: TRELLO_TOKEN
 					}
 				};
 				request(options, function (error, response, body) {
@@ -136,9 +139,8 @@ function getAllCardsFromTrello() {
 		method: 'GET',
 		url: 'https://api.trello.com/1/boards/5aab56b2f7eff265dc076d7c/cards',
 		qs: {
-			key: process.env.TRELLO_KEY,
-
-			token: process.env.TRELLO_TOKEN
+			key: TRELLO_KEY,
+			token: TRELLO_TOKEN
 		}
 	};
 	return new Promise((resolve, reject) => {
@@ -163,10 +165,10 @@ function checkCardsToDelete() {
 
 					const options = {
 						method: 'DELETE',
-						url: 'https://api.trello.com/1/cards/' + card.id,
+						url: TRELLO_CARDS_URL + card.id,
 						qs: {
-							key: process.env.TRELLO_KEY,
-							token: process.env.TRELLO_TOKEN
+							key: TRELLO_KEY,
+							token: TRELLO_TOKEN
 						}
 					};
 
@@ -240,14 +242,14 @@ setInterval(checkCardsToDelete, 5000);
 //Post request to create a new trello card, hardcoded fields are obv changed
 const options = {
 	method: 'POST',
-	url: 'https://api.trello.com/1/cards',
+	url: TRELLO_CARDS_URL,
 	qs: {
 		name: 'Get eaten by Sharks!',
 		desc: 'submitted by Kevin Jin',
 		idList: trelloListIDs["test"],
 		keepFromSource: 'all',
-		key: process.env.TRELLO_KEY,
-		token: process.env.TRELLO_TOKEN
+		key: TRELLO_KEY,
+		token: TRELLO_TOKEN
 	}
 };
 
@@ -257,6 +259,6 @@ const getChannelMessages = {
 	url: 'https://slack.com/api/channels.history',
 	qs: {
 		channel: 'C9S0DF3BR',
-		token: process.env.SLACKBOT_TOKEN
+		token: SLACKBOT_TOKEN
 	}
 };
