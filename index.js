@@ -92,43 +92,43 @@ function postCardOnTrello(data) {
 function checkMessageUpdates() {
 	if (!botStarted)
 		return;
-		request(getChannelMessages, function (error, response, body) {
-			if (error) {
-				throw new Error(error);
-			};
-			JSON.parse(body).messages.forEach((message, i) => {
-				if (!message.edited || message.text.indexOf("This message was deleted.") > -1)
+	request(getChannelMessages, function (error, response, body) {
+		if (error) {
+			throw new Error(error);
+		};
+		JSON.parse(body).messages.forEach((message, i) => {
+			if (!message.edited || message.text.indexOf("This message was deleted.") > -1)
+				return;
+			console.log("edited message" + JSON.stringify(message));
+			let trelloCard = matchSlackThreadToTrelloCard(message.ts, message.edited.ts);
+			trelloCard.then(card => {
+				if (card.desc.indexOf(message.edited.ts) > -1)
 					return;
-					console.log("edited message" + JSON.stringify(message));
-					let trelloCard = matchSlackThreadToTrelloCard(message.ts, message.edited.ts);
-					trelloCard.then(card => {
-						if (card.desc.indexOf(message.edited.ts) > -1)
-							return;
-							console.log(card);
-							const options = {
-								method: 'PUT',
-								url: 'https://api.trello.com/1/cards/' + card.id,
-								qs: {
-									name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
-									desc: card.desc + "\nEdited Slack ID: " + message.edited.ts,
-									key: process.env.TRELLO_KEY,
-									token: process.env.TRELLO_TOKEN
-								}
-							};
-							request(options, function (error, response, body) {
-								if (error) throw new Error(error);
-								const params = {
-									icon_emoji: ":female-office-worker:",
-									thread_ts: message.ts
-								}
-								bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
-								console.log(body);
-							});
-					}, error => {
-						console.log(error);
-					});
-			})
-		});
+				console.log(card);
+				const options = {
+					method: 'PUT',
+					url: 'https://api.trello.com/1/cards/' + card.id,
+					qs: {
+						name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
+						desc: card.desc + "\nEdited Slack ID: " + message.edited.ts,
+						key: process.env.TRELLO_KEY,
+						token: process.env.TRELLO_TOKEN
+					}
+				};
+				request(options, function (error, response, body) {
+					if (error) throw new Error(error);
+					const params = {
+						icon_emoji: ":female-office-worker:",
+						thread_ts: message.ts
+					}
+					bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
+					console.log(body);
+				});
+			}, error => {
+				console.log(error);
+			});
+		})
+	});
 }
 //returns all the cards on trello board in an array
 function getAllCardsFromTrello() {
@@ -157,31 +157,31 @@ function checkCardsToDelete() {
 			allCards.forEach((card, i) => {
 				if (card.desc.indexOf(">>") === -1)
 					return;
-					let checkCard = findCardInSlack(card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1), JSON.parse(body).messages);
-					checkCard.then((deletedIdeaTs) => {
-						console.log("delete this card" + card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1));
+				let checkCard = findCardInSlack(card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1), JSON.parse(body).messages);
+				checkCard.then((deletedIdeaTs) => {
+					console.log("delete this card" + card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1));
 
-						const options = {
-							method: 'DELETE',
-							url: 'https://api.trello.com/1/cards/' + card.id,
-							qs: {
-								key: process.env.TRELLO_KEY,
-								token: process.env.TRELLO_TOKEN
-							}
-						};
-
-						const params = {
-							icon_emoji: ":female-office-worker:",
-							thread_ts: deletedIdeaTs
+					const options = {
+						method: 'DELETE',
+						url: 'https://api.trello.com/1/cards/' + card.id,
+						qs: {
+							key: process.env.TRELLO_KEY,
+							token: process.env.TRELLO_TOKEN
 						}
-						bot.postMessageToChannel('testchannel', "Hey, I noticed you just deleted your idea. I will also deleted the corresponding card on Trello for you. For archiving purposes, the deleted idea was: " + card.name, params);
-						request(options, function (error, response, body) {
-							if (error) {
-								bot.postMessageToChannel('testchannel', "Hey, your idea was not deleted successfully on Trello, please contact the dev team to report this bug, thanks!", params);
-							}
-							console.log("Successfully deleted trello card");
-						});
-					}, () => console.log("didn't have to delete card"));
+					};
+
+					const params = {
+						icon_emoji: ":female-office-worker:",
+						thread_ts: deletedIdeaTs
+					}
+					bot.postMessageToChannel('testchannel', "Hey, I noticed you just deleted your idea. I will also deleted the corresponding card on Trello for you. For archiving purposes, the deleted idea was: " + card.name, params);
+					request(options, function (error, response, body) {
+						if (error) {
+							bot.postMessageToChannel('testchannel', "Hey, your idea was not deleted successfully on Trello, please contact the dev team to report this bug, thanks!", params);
+						}
+						console.log("Successfully deleted trello card");
+					});
+				}, () => console.log("didn't have to delete card"));
 			});
 		}, error => console.log(error));
 	});
