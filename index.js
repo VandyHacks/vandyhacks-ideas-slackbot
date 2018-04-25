@@ -90,17 +90,20 @@ function postCardOnTrello(data) {
 
 //check for edited messages in the ideas channel and returns them
 function checkMessageUpdates() {
-	if (botStarted) {
+	if (!botStarted)
+		return;
 		request(getChannelMessages, function (error, response, body) {
 			if (error) {
 				throw new Error(error);
 			};
 			JSON.parse(body).messages.forEach((message, i) => {
-				if (message.edited && message.text.indexOf("This message was deleted.") == -1) {
+				if (!message.edited || message.text.indexOf("This message was deleted.") > -1)
+					return;
 					console.log("edited message" + JSON.stringify(message));
 					let trelloCard = matchSlackThreadToTrelloCard(message.ts, message.edited.ts);
 					trelloCard.then(card => {
-						if (card.desc.indexOf(message.edited.ts) == -1) {
+						if (card.desc.indexOf(message.edited.ts) > -1)
+							return;
 							console.log(card);
 							const options = {
 								method: 'PUT',
@@ -121,14 +124,11 @@ function checkMessageUpdates() {
 								bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
 								console.log(body);
 							});
-						}
 					}, error => {
 						console.log(error);
 					});
-				}
 			})
 		});
-	}
 }
 //returns all the cards on trello board in an array
 function getAllCardsFromTrello() {
@@ -155,7 +155,8 @@ function checkCardsToDelete() {
 		let allTrelloCards = getAllCardsFromTrello();
 		allTrelloCards.then(JSON.parse, "JSON parsing had an error").then(allCards => {
 			allCards.forEach((card, i) => {
-				if (card.desc.indexOf(">>") != -1) {
+				if (card.desc.indexOf(">>") === -1)
+					return;
 					let checkCard = findCardInSlack(card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1), JSON.parse(body).messages);
 					checkCard.then((deletedIdeaTs) => {
 						console.log("delete this card" + card.desc.substring(card.desc.indexOf(">>") + 2, card.desc.indexOf("<<") - 1));
@@ -181,7 +182,6 @@ function checkCardsToDelete() {
 							console.log("Successfully deleted trello card");
 						});
 					}, () => console.log("didn't have to delete card"));
-				}
 			});
 		}, error => console.log(error));
 	});
