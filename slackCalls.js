@@ -48,10 +48,9 @@ function postCardOnTrello(data) {
 		thread_ts: data.ts
 	}
 	needToReply = true;
-
 	let options = trelloCalls.createTrelloCard(
     data.text.substring(data.text.indexOf("::") + 2, data.text.length),
-    "Submitted by " + data.user + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
+    "Commitee: "+committees.toUpperCase()+ "\n" + "Submitted by " + data.user + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
   );
 
 	commiteesArray.forEach((commitee, i) => {
