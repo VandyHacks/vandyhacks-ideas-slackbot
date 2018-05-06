@@ -1,15 +1,48 @@
 require('dotenv').config();
 const SlackBot = require('slackbots');
 const request = require("request");
+const express = require("express");
+let app = express();
+let router = express.Router();
+let bodyParser = require('body-parser');
 
 const {SLACKBOT_TOKEN, TRELLO_TOKEN, TRELLO_KEY} = process.env;
 const TRELLO_CARDS_URL = 'https://api.trello.com/1/cards';
+
+
+let port = process.env.PORT || 8080;
+
+app.set('port', port);
+
+app.use('/api', router);
+
+app.listen(port, ()=> {
+  console.log("We are using port: " + port);
+});
+
+router.use(function(req, res,next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
+
+router.route('/cards').get(function(req, res) {
+	// console.log("TRYING TO GET CARDS" + getAllCardsFromTrello());
+	// getAllCardsFromTrello().then(res.json, "there was an error in getting cards")
+	let allTrelloCards = getAllCardsFromTrello();
+	allTrelloCards.then(JSON.parse, "JSON parsing had an error").then(allCards => {
+			res.send(allCards);
+	});
+});
 
 //create the Slackbot
 const bot = new SlackBot({
 	token: SLACKBOT_TOKEN,
 	name: 'Jenny'
 });
+
+//TODO: Sort by upvotes
+//TODO: Add React Front End
 
 //IDs of each committee list on Trello Board
 const trelloListIDs = {
@@ -93,46 +126,134 @@ function postCardOnTrello(data) {
 
 //check for edited messages in the ideas channel and returns them
 function checkMessageUpdates() {
-	if (!botStarted)
-		return;
-	request(getChannelMessages, function (error, response, body) {
-		if (error) {
-			throw new Error(error);
-		};
-		JSON.parse(body).messages.forEach((message, i) => {
-			if (!message.edited || message.text.indexOf("This message was deleted.") > -1)
-				return;
-			console.log("edited message" + JSON.stringify(message));
-			let trelloCard = matchSlackThreadToTrelloCard(message.ts, message.edited.ts);
-			trelloCard.then(card => {
-				if (card.desc.indexOf(message.edited.ts) > -1)
-					return;
-				console.log(card);
-				const options = {
-					method: 'PUT',
-					url: TRELLO_CARDS_URL + card.id,
-					qs: {
-						name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
-						desc: card.desc + "\nEdited Slack ID: " + message.edited.ts,
-						key: TRELLO_KEY,
-						token: TRELLO_TOKEN
-					}
-				};
-				request(options, function (error, response, body) {
-					if (error) throw new Error(error);
-					const params = {
-						icon_emoji: ":female-office-worker:",
-						thread_ts: message.ts
-					}
-					bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
-					console.log(body);
-				});
-			}, error => {
-				console.log(error);
-			});
-		})
-	});
+	if (botStarted) {
+		request(getChannelMessages, function (error, response, body) {
+			if (error) {
+				throw new Error(error);
+			};
+			JSON.parse(body).messages.forEach((message, i) => {
+				if (message.edited && message.text.indexOf("This message was deleted.") == -1) {
+					console.log("edited message" + JSON.stringify(message));
+					let trelloCard = matchSlackThreadToTrelloCard(message.ts, message.edited.ts);
+					trelloCard.then(card => {
+						if (card.desc.indexOf(message.edited.ts) == -1) {
+							console.log(card);
+							const options = {
+								method: 'PUT',
+								url: 'https://api.trello.com/1/cards/' + card.id,
+								qs: {
+									name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
+									desc: card.desc + "\nEdited Slack ID: " + message.edited.ts,
+									key: TRELLO_KEY,
+									token: TRELLO_TOKEN
+								}
+							};
+							request(options, function (error, response, body) {
+								if (error) throw new Error(error);
+								const params = {
+									icon_emoji: ":female-office-worker:",
+									thread_ts: message.ts
+								}
+								bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
+								console.log(body);
+							});
+						}
+					}, error => {
+						console.log(error);
+					});
+				}
+			})
+		});
+	}
 }
+
+//check for edited messages in the ideas channel and returns them
+// function updateUpvotes() {
+// 	if (!botStarted)
+// 		return;
+// 	request(getChannelMessages, function (error, response, body) {
+// 		if (error) {
+// 			throw new Error(error);
+// 		};
+// 		JSON.parse(body).messages.forEach((message, i) => {
+// 			if (!message.reactions || message.text.indexOf("This message was deleted.") > -1)
+// 				return;
+// 			console.log("reacted idea: " + JSON.stringify(message));
+// 			let trelloCard = matchSlackThreadToTrelloCard(message.ts, -1);
+// 			trelloCard.then(card => {
+// 				console.log(card);
+// 				const options = {
+// 					method: 'PUT',
+// 					url: TRELLO_CARDS_URL + card.id,
+// 					qs: {
+// 						name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
+// 						desc: card.desc.indexOf("Upvotes: ")==-1 ? card.desc = card.desc + " Upvotes: 1" : card.desc = card.desc.substring(0,card.desc.indexOf("Upvotes:")) + "Upvotes: " + (parseInt(card.desc.substring(card.desc.indexOf("Upvotes:")+9,card.desc.length))+1),
+// 						key: TRELLO_KEY,
+// 						token: TRELLO_TOKEN
+// 					}
+// 				};
+// 				request(options, function (error, response, body) {
+// 					if (error) throw new Error(error);
+// 					const params = {
+// 						icon_emoji: ":female-office-worker:",
+// 						thread_ts: message.ts
+// 					}
+// 					console.log(body);
+// 				});
+// 			}, error => {
+// 				console.log(error);
+// 			});
+// 		})
+// 	});
+// }
+
+function updateUpvotes() {
+	if (botStarted) {
+		request(getChannelMessages, function (error, response, body) {
+			if (error) {
+				throw new Error(error);
+			};
+			JSON.parse(body).messages.forEach((message, i) => {
+				if (message.reactions && message.text.indexOf("This message was deleted.") == -1) {
+					let trelloCard = matchSlackThreadToTrelloCard(message.ts, -1);
+					trelloCard.then(card => {
+							console.log(card);
+							const options = {
+								method: 'PUT',
+								url: 'https://api.trello.com/1/cards/' + card.id,
+								qs: {
+									name: message.text.indexOf("::") == -1 ? message.text : message.text.substring(message.text.indexOf("::") + 2, message.text.length),
+									desc: card.desc.indexOf("Upvotes: ")==-1 ? card.desc = card.desc + " Upvotes: 1" : card.desc = card.desc.substring(0,card.desc.indexOf("Upvotes:")) + "Upvotes: " + getUpvotes(message.reactions),
+									key: TRELLO_KEY,
+									token: TRELLO_TOKEN
+								}
+							};
+							request(options, function (error, response, body) {
+								if (error) throw new Error(error);
+								const params = {
+									icon_emoji: ":female-office-worker:",
+									thread_ts: message.ts
+								}
+							});
+					}, error => {
+						console.log(error);
+					});
+				}
+			})
+		});
+	}
+}
+
+function getUpvotes(reactions) {
+	let counter = 0;
+	for(i in reactions) {
+		if(reactions[i].name=='+1' || reactions[i].name=='thumbsup_all') {
+			counter = counter + reactions[i].count;
+		}
+	}
+	return counter;
+}
+
 //returns all the cards on trello board in an array
 function getAllCardsFromTrello() {
 	const options = {
@@ -236,7 +357,7 @@ function matchSlackThreadToTrelloCard(slackTs, editedTs = 5) {
 }
 setInterval(checkMessageUpdates, 5000);
 setInterval(checkCardsToDelete, 5000);
-
+setInterval(updateUpvotes,2000);
 //TODO: I also want to map threads to ideas so users can "delete this idea", "update this idea"
 
 //Post request to create a new trello card, hardcoded fields are obv changed
