@@ -48,32 +48,35 @@ function postCardOnTrello(data) {
 		thread_ts: data.ts
 	}
 	needToReply = true;
-	let options = trelloCalls.createTrelloCard(
-    data.text.substring(data.text.indexOf("::") + 2, data.text.length),
-    "Commitee: "+committees.toUpperCase()+ "\n" + "Submitted by " + data.user + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
-  );
 
-	commiteesArray.forEach((commitee, i) => {
-    let trelloListIDs = trelloCalls.getTrelloListIDs();
-		if (commitee in trelloListIDs) {
-			console.log("yay");
-			options.qs.idList = trelloListIDs[commitee];
-			request(options, function (error, response, body) {
-				if (error) {
-					bot.postMessageToChannel('testchannel', "Whoops, your idea was not posted to Trello correctly. Please ping the dev team to fix me");
-					throw new Error(error);
-				};
-				didItWork = true;
-			});
-			if (needToReply) {
-				bot.postMessageToChannel('testchannel', "Thanks for the idea, I will post it on the Trello Board. To update or delete this idea, please let me know in this thread", params);
-				needToReply = false;
-			}
-		} else {
-			console.log("not in trello list");
-			console.log(commitee);
-		}
-	});
+  getSlackUserFromID(data.user).then(slackName => {
+    let options = trelloCalls.createTrelloCard(
+      data.text.substring(data.text.indexOf("::") + 2, data.text.length),
+      "Commitee: "+committees.toUpperCase()+ "\n" + "Submitted by " + slackName + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
+    );
+
+    commiteesArray.forEach((commitee, i) => {
+      let trelloListIDs = trelloCalls.getTrelloListIDs();
+      if (commitee in trelloListIDs) {
+        console.log("yay");
+        options.qs.idList = trelloListIDs[commitee];
+        request(options, function (error, response, body) {
+          if (error) {
+            bot.postMessageToChannel('testchannel', "Whoops, your idea was not posted to Trello correctly. Please ping the dev team to fix me");
+            throw new Error(error);
+          };
+          didItWork = true;
+        });
+        if (needToReply) {
+          bot.postMessageToChannel('testchannel', "Thanks for the idea, I will post it on the Trello Board. To update or delete this idea, please let me know in this thread", params);
+          needToReply = false;
+        }
+      } else {
+        console.log("not in trello list");
+        console.log(commitee);
+      }
+    });
+  });
 
 }
 
@@ -207,6 +210,31 @@ function findCardInSlack(ts, slackMessages) {
 			}
 		});
 	});
+}
+
+function getSlackUserFromID(userId) {
+  const options = {
+    method: 'GET',
+    url: 'https://slack.com/api/users.list',
+    qs: {
+      token: process.env.SLACKBOT_TOKEN
+    }
+  };
+  return new Promise((resolve, reject) => {
+    request(options, function(error, response, body) {
+      if(error) {
+        reject(error);
+      }
+      let members = JSON.parse(body).members;
+      for(i in members) {
+        if(members[i].id==userId) {
+          console.log("hello there" + members[i].real_name);
+          resolve(members[i].real_name);
+        }
+      }
+      resolve("Anonymous");
+    });
+  })
 }
 
 module.exports = {
