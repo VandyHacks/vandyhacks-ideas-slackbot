@@ -191,26 +191,18 @@ function checkMessageUpdates() {
 //Helper function to find a card by TS in the slack channel
 function findCardInSlack(ts, slackMessages) {
 	return new Promise((resolve, reject) => {
-		let counter = 0;
+		let foundCard = false;
 		slackMessages.forEach((message, i) => {
 			if (message.ts.indexOf(ts) != -1 || ts.indexOf(message.ts) != -1) {
 				if (message.text.indexOf("This message was deleted.") != -1) {
+					foundCard = true;
 					resolve(message.ts);
-				} else {
-					counter++;
-					if (counter == slackMessages.length) {
-						console.log("counter" + counter);
-						reject();
-					}
-				}
-			} else {
-				counter++;
-				if (counter == slackMessages.length) {
-					console.log("counter" + counter);
-					reject();
 				}
 			}
 		});
+		if(!foundCard) {
+			reject("Card not found in Slack.");
+		}
 	});
 }
 
