@@ -35,9 +35,9 @@ router.route('/cards').get(function(req, res) {
 	});
 });
 
-setInterval(slackCalls.checkMessageUpdates, 5000);
-setInterval(slackCalls.checkCardsToDelete, 5000);
-setInterval(slackCalls.updateUpvotes,5000);
+setInterval(slackCalls.checkMessageUpdates, 60000);
+setInterval(slackCalls.checkCardsToDelete, 60000);
+setInterval(slackCalls.updateUpvotes,60000);
 
 
 const bot = new SlackBot({
