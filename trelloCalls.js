@@ -105,11 +105,11 @@ function createTrelloCard(cardName, cardDesc) {
 }
 
 module.exports = {
-  matchSlackThreadToTrelloCard: matchSlackThreadToTrelloCard,
-  getAllCardsFromTrello: getAllCardsFromTrello,
-  deleteTrelloCardReq: deleteTrelloCardReq,
-  getUpvotes: getUpvotes,
-  updateTrelloCard: updateTrelloCard,
-  createTrelloCard: createTrelloCard,
-  getTrelloListIDs: getTrelloListIDs
+  matchSlackThreadToTrelloCard,
+  getAllCardsFromTrello,
+  deleteTrelloCardReq,
+  getUpvotes,
+  updateTrelloCard,
+  createTrelloCard,
+  getTrelloListIDs
 };

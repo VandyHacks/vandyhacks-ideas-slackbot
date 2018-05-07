@@ -232,9 +232,9 @@ function getSlackUserFromID(userId) {
 }
 
 module.exports = {
-  checkMessageUpdates: checkMessageUpdates,
-  checkCardsToDelete: checkCardsToDelete,
-  updateUpvotes: updateUpvotes,
-  postCardOnTrello: postCardOnTrello,
-  getSlackBot: getSlackBot
+  checkMessageUpdates,
+  checkCardsToDelete,
+  updateUpvotes,
+  postCardOnTrello,
+  getSlackBot
 };
