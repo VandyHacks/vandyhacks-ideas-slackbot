@@ -1,16 +1,14 @@
 require('dotenv').config();
-const request = require("request");
 const express = require("express");
 const trelloCalls = require('./trelloCalls.js');
 const slackCalls = require('./slackCalls.js');
 const SlackBot = require('slackbots');
-let app = express();
-let router = express.Router();
-let bodyParser = require('body-parser');
+const app = express();
+const router = express.Router();
 
 const {SLACKBOT_TOKEN, TRELLO_TOKEN, TRELLO_KEY} = process.env;
 
-let port = process.env.PORT || 8080;
+const port = process.env.PORT || 8080;
 
 app.set('port', port);
 
@@ -48,7 +46,7 @@ const bot = new SlackBot({
 //Bot recieves a new RTM notification from Slack
 bot.on('message', function (data) {
 	if (data.text && data.text.includes("::")) {
-		console.log("I RECELIVED THE MESSAGE");
+		console.log("I RECEIVED THE MESSAGE");
 
 		if (!data.ts) {
 			console.log("something broke");
