@@ -3,6 +3,8 @@ const trelloCalls = require('./trelloCalls.js');
 const SlackBot = require('slackbots');
 const request = require("request");
 
+const CHANNEL_NAME = 'testchannel';
+const CHANNEL_ID = 'C9S0DF3BR';
 
 //create the Slackbot
 const bot = new SlackBot({
@@ -18,7 +20,7 @@ bot.on('start', function () {
 	let params = {
 		icon_emoji: ":female-office-worker:"
 	}
-	bot.postMessageToChannel('testchannel', "Hi I'm Jenny, the Slack Bot for VandyHacks, and I will sort all your great ideas!", params);
+	bot.postMessageToChannel(CHANNEL_NAME, "Hi I'm Jenny, the Slack Bot for VandyHacks, and I will sort all your great ideas!", params);
 });
 
 function getSlackBot() {
@@ -30,19 +32,19 @@ const getChannelMessages = {
   method: 'GET',
   url: 'https://slack.com/api/channels.history',
   qs: {
-    channel: 'C9S0DF3BR',
+    channel: CHANNEL_ID,
     token: process.env.SLACKBOT_TOKEN
   }
 };
 
 //given a notification, check if the data is in the <committee1,committee2>::<idea>
-//If so, then check whether or not the commitees are valid
-//If so, then post the idea to appropriate commitee boards on trello
+//If so, then check whether or not the committees are valid
+//If so, then post the idea to appropriate committee boards on trello
 //Also reply to the user on Trello that their idea has been posted
 function postCardOnTrello(data) {
 	let committees = data.text.substring(0, data.text.indexOf("::")).replace(/\s+/g, '');
 	console.log(committees);
-	let commiteesArray = committees.split(",");
+	let committeesArray = committees.split(",");
 	const params = {
 		icon_emoji: ":female-office-worker:",
 		thread_ts: data.ts
@@ -52,28 +54,28 @@ function postCardOnTrello(data) {
   getSlackUserFromID(data.user).then(slackName => {
     let options = trelloCalls.createTrelloCard(
       data.text.substring(data.text.indexOf("::") + 2, data.text.length),
-      "Commitee: "+committees.toUpperCase()+ "\n" + "Submitted by " + slackName + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
+      "Committee: "+committees.toUpperCase()+ "\n" + "Submitted by " + slackName + "\nSlack ID>>" + data.ts + "<<",  //TODO need to fix User's name
     );
 
-    commiteesArray.forEach((commitee, i) => {
+    committeesArray.forEach((committee, i) => {
       let trelloListIDs = trelloCalls.getTrelloListIDs();
-      if (commitee in trelloListIDs) {
+      if (committee in trelloListIDs) {
         console.log("yay");
-        options.qs.idList = trelloListIDs[commitee];
+        options.qs.idList = trelloListIDs[committee];
         request(options, function (error, response, body) {
           if (error) {
-            bot.postMessageToChannel('testchannel', "Whoops, your idea was not posted to Trello correctly. Please ping the dev team to fix me");
+            bot.postMessageToChannel(CHANNEL_NAME, "Whoops, your idea was not posted to Trello correctly. Please ping the dev team to fix me");
             throw new Error(error);
           };
           didItWork = true;
         });
         if (needToReply) {
-          bot.postMessageToChannel('testchannel', "Thanks for the idea, I will post it on the Trello Board. To update or delete this idea, please let me know in this thread", params);
+          bot.postMessageToChannel(CHANNEL_NAME, "Thanks for the idea, I will post it on the Trello Board. To update or delete this idea, please let me know in this thread", params);
           needToReply = false;
         }
       } else {
         console.log("not in trello list");
-        console.log(commitee);
+        console.log(committee);
       }
     });
   });
@@ -99,10 +101,10 @@ function checkCardsToDelete() {
 						icon_emoji: ":female-office-worker:",
 						thread_ts: deletedIdeaTs
 					}
-					bot.postMessageToChannel('testchannel', "Hey, I noticed you just deleted your idea. I will also deleted the corresponding card on Trello for you. For archiving purposes, the deleted idea was: " + card.name, params);
+					bot.postMessageToChannel(CHANNEL_NAME, "Hey, I noticed you just deleted your idea. I will also deleted the corresponding card on Trello for you. For archiving purposes, the deleted idea was: " + card.name, params);
 					request(options, function (error, response, body) {
 						if (error) {
-							bot.postMessageToChannel('testchannel', "Hey, your idea was not deleted successfully on Trello, please contact the dev team to report this bug, thanks!", params);
+							bot.postMessageToChannel(CHANNEL_NAME, "Hey, your idea was not deleted successfully on Trello, please contact the dev team to report this bug, thanks!", params);
 						}
 						console.log("Successfully deleted trello card");
 					});
@@ -172,7 +174,7 @@ function checkMessageUpdates() {
 									icon_emoji: ":female-office-worker:",
 									thread_ts: message.ts
 								}
-								bot.postMessageToChannel('testchannel', "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
+								bot.postMessageToChannel(CHANNEL_NAME, "Hey, I noticed you edited your idea. I also updated the corresponding trello card as well!", params);
 								console.log(body);
 							});
 						}
