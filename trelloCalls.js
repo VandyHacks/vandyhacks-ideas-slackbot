@@ -8,7 +8,9 @@ const trelloListIDs = {
 	"dev": "5aab5b7a6cfdf064d8dab063",
 	"test": "5aab58024860cf64f1b2cab7",
 	"sponsorship": "5aab5b7954bd914c03e95a0c",
-	"logistics": "5aab5b755331d964fef346e3"
+	"logistics": "5aab5b755331d964fef346e3",
+	"communications": "5b39e3b4f132c85ddc81f0a7",
+	"hackerxp": "5b39e3b7533f00499b9bdfde"
 }
 
 function getTrelloListIDs() {

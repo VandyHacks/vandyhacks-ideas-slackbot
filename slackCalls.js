@@ -79,7 +79,6 @@ function postCardOnTrello(data) {
       }
     });
   });
-
 }
 
 //Periodically check for deleted slack messages and delete corresponding trello CARDS
@@ -147,7 +146,6 @@ function updateUpvotes() {
 		});
 	}
 }
-
 
 //Periodically check for edited messages in the ideas channel and updates the corresponding Trello Card
 function checkMessageUpdates() {
