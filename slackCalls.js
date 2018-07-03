@@ -70,7 +70,7 @@ function postCardOnTrello(data) {
           didItWork = true;
         });
         if (needToReply) {
-          bot.postMessageToChannel(CHANNEL_NAME, "Thanks for the idea, I will post it on the Trello Board. To update or delete this idea, please let me know in this thread", params);
+          bot.postMessageToChannel(CHANNEL_NAME, "Thanks for the idea, I will post it on our Ideas Board http://vhideas.netlify.com/ . To update or delete this idea, just do as you would with a regular slack message", params);
           needToReply = false;
         }
       } else {
