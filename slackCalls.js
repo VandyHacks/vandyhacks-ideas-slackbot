@@ -3,8 +3,8 @@ const trelloCalls = require('./trelloCalls.js');
 const SlackBot = require('slackbots');
 const request = require("request");
 
-const CHANNEL_NAME = 'testchannel';
-const CHANNEL_ID = 'C9S0DF3BR';
+const CHANNEL_NAME = 'ideas';
+const CHANNEL_ID = 'C920NT4J0';
 
 //create the Slackbot
 const bot = new SlackBot({
