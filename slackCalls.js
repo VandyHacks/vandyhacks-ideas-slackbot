@@ -20,7 +20,6 @@ bot.on('start', function () {
 	let params = {
 		icon_emoji: ":female-office-worker:"
 	}
-	bot.postMessageToChannel(CHANNEL_NAME, "Hi I'm Jenny, the Slack Bot for VandyHacks, and I will sort all your great ideas!", params);
 });
 
 function getSlackBot() {
