@@ -1,5 +1,7 @@
 # vandyhacks-slackbot
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/VandyHacks/vandyhacks-ideas-slackbot.svg)](https://greenkeeper.io/)
+
 ## Purpose
 Automate collecting ideas from the VandyHacks Slack `ideas` channel and categorize them on the Trello board.
 
