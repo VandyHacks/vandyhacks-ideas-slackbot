@@ -19,19 +19,15 @@ app.listen(port, ()=> {
 app.use('/api', router);
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
-let params = {
-	icon_emoji: ":chipmunk:"
-}
 router.route('/:channel/loudspeaker').post(function(req, res) {
 	console.log(req.body)
 	let channel = req.params.channel
-	bot.postMessageToChannel(channel, req.body.msg,params);
+	bot.postMessageToChannel(channel, req.body.msg,{as_user: true});
 	res.status(200).send();
 });
 
 const bot = new SlackBot({
 	token: SLACKBOT_TOKEN,
-	name: 'Justin'
 });
 let botStarted = false;
 bot.on('start', function () {
