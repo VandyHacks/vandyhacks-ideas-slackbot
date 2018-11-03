@@ -22,7 +22,7 @@ router.use(bodyParser.urlencoded({ extended: true }));
 router.route('/:channel/loudspeaker').post(function(req, res) {
 	console.log(req.body)
 	let channel = req.params.channel;
-	bot.postMessageToChannel(channel, "@channel " + req.body.msg,{as_user: true});
+	bot.postMessageToChannel(channel, "<!channel> " + req.body.msg,{as_user: true});
 	res.status(200).send();
 });
 
