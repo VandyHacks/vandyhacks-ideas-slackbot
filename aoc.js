@@ -5,6 +5,7 @@ const SlackBot = require('slackbots');
 const app = express();
 const router = express.Router();
 const request = require('request');
+var cronJob = require('cron').CronJob;
 
 let {SLACKBOT_TOKEN,COOKIE} = process.env;
 
@@ -38,10 +39,6 @@ bot.on('message', function (data) {
 	}
 });
 
-bot.on('start', function () {
-	postLeaderboard()
-});
-
 let postLeaderboard = () => {
     let options = {
         url: "https://adventofcode.com/2018/leaderboard/private/view/219486.json",
@@ -50,7 +47,13 @@ let postLeaderboard = () => {
         }
     }
     request(options, function(error, response,body) {
-        body = JSON.parse(body)
+        try {
+            body = JSON.parse(body)
+        } catch(e) {
+            console.log(e)
+            console.log("didnt work :(")
+            return;
+        }
     if (!error && response.statusCode == 200 && body) {
         let allData = Object.keys(body.members).map((playerId) => {
             let text = `${body.members[playerId].name}:\t${body.members[playerId].stars}`
@@ -65,4 +68,12 @@ let postLeaderboard = () => {
         bot.postMessageToChannel("advent-of-code",message,params)
     }
     });
+
 }
+
+new cronJob({
+    cronTime: "* * * * *",
+    onTick: postLeaderboard,
+    start: true,
+    timeZone: "America/New_York"
+});
