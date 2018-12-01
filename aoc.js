@@ -65,7 +65,7 @@ let postLeaderboard = () => {
         });
         let message = (allData.map(e=>e.text)).join("\n")
         console.log(message);
-        bot.postMessageToChannel("advent-of-code",message,params)
+        bot.postMessageToChannel("testchannel",message,params)
     }
     });
 
