@@ -63,8 +63,8 @@ let postLeaderboard = () => {
         allData.sort(function (a, b) {
             return b.score - a.score;
         });
-        let message = (allData.map(e=>e.text)).join("\n")
-        console.log(message);
+        let message = (allData.map((e,i)=>`${i+1}). ${e.text}`)).join("\n")
+        // console.log(message);
         bot.postMessageToChannel("advent-of-code",message,params)
     }
     });
