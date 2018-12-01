@@ -61,7 +61,7 @@ let postLeaderboard = () => {
             return {text: text, score: score}
         })
         allData.sort(function (a, b) {
-            return a.score - b.score;
+            return b.score - a.score;
         });
         let message = (allData.map(e=>e.text)).join("\n")
         console.log(message);
@@ -72,7 +72,7 @@ let postLeaderboard = () => {
 }
 
 new cronJob({
-    cronTime: "* * * * *",
+    cronTime: "0 19 * * *",
     onTick: postLeaderboard,
     start: true,
     timeZone: "America/New_York"
