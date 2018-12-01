@@ -72,7 +72,7 @@ let postLeaderboard = () => {
 }
 
 new cronJob({
-    cronTime: "0 19 * * *",
+    cronTime: "5 19 * * 2",
     onTick: postLeaderboard,
     start: true,
     timeZone: "America/New_York"
