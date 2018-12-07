@@ -17,6 +17,13 @@ app.listen(port, ()=> {
     console.log("We are using port: " + port);
   });
 
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: true }));
+router.route('/').get(function(req, res) {
+    console.log(`Pinged at ${new Date()}`)
+    res.status(200).send();
+});
+
 const bot = new SlackBot({
     token: SLACKBOT_TOKEN,
     name: "VH AoC Leaderboards"
