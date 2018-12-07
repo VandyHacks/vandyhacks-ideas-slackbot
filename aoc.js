@@ -35,7 +35,9 @@ var params = {
 
 //Bot recieves a new RTM notification from Slack
 bot.on('message', function (data) {
-	if (data.text && data.text.includes("!leaderboard")) {
+	const txt = data.text.trim();
+	
+	if (txt && ["!leaderboard", "!lb", "!flex"].includes(txt)) {
 		console.log("sent leaderboard");
 
 		if (!data.ts) {
