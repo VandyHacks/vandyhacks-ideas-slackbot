@@ -17,12 +17,12 @@ app.listen(port, ()=> {
     console.log("We are using port: " + port);
   });
 
-router.use(bodyParser.json());
-router.use(bodyParser.urlencoded({ extended: true }));
-router.route('/').get(function(req, res) {
-    console.log(`Pinged at ${new Date()}`)
-    res.status(200).send();
-});
+// router.use(bodyParser.json());
+// router.use(bodyParser.urlencoded({ extended: true }));
+// router.route('/').get(function(req, res) {
+//     console.log(`Pinged at ${new Date()}`)
+//     res.status(200).send();
+// });
 
 const bot = new SlackBot({
     token: SLACKBOT_TOKEN,
@@ -35,7 +35,8 @@ var params = {
 
 //Bot recieves a new RTM notification from Slack
 bot.on('message', function (data) {
-	const txt = data.text.trim();
+    let txt;
+    if (data.text) txt = data.text.trim();
 	
 	if (txt && ["!leaderboard", "!lb", "!flex"].includes(txt)) {
 		console.log("sent leaderboard");
