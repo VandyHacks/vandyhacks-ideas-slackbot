@@ -64,8 +64,8 @@ let postLeaderboard = () => {
         }
     if (!error && response.statusCode == 200 && body) {
         let allData = Object.keys(body.members).map((playerId) => {
-            let text = `${body.members[playerId].name}:\t${body.members[playerId].stars}`
-            let score = body.members[playerId].stars*1000+body.members[playerId].local_score
+            let text = `${body.members[playerId].name}:\t${body.members[playerId].local_score}[${body.members[playerId].stars}]`
+            let score = body.members[playerId].local_score
             return {text: text, score: score}
         })
         allData.sort(function (a, b) {
